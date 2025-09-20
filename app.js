@@ -26,7 +26,7 @@
   // In production, call your server endpoint to fetch official RBI rates (server must be trusted).
   const demoRates = {
     "USD": 82.50,
-    "EUR": 89.10,
+    "EUR": 103.49,
     "GBP": 103.25,
     "AUD": 50.40,
     "CAD": 61.80,
