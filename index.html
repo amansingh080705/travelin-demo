@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TravelIN — Fintech for Visitors to India</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo">TravelIN</h1>
+      <nav class="nav">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#visa">Sign in</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <h2>Spend in India. Simple. Secure. RBI-aligned.</h2>
+          <p>Submit your visa, get a temporary virtual INR debit card, pay locally or withdraw cash from partners — all at official government exchange rates.</p>
+          <a class="btn" href="#visa">Get started</a>
+        </div>
+        <div class="hero-card" id="virtual-card-preview">
+          <!-- Virtual card preview will populate here -->
+          <div class="card-placeholder">Virtual card preview</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="container how-it-works">
+      <h3>How it works</h3>
+      <ol>
+        <li>Sign in with visa details — we verify your eligibility (RBI-compliant KYC flow).</li>
+        <li>We create a temporary virtual debit card loaded in INR at official exchange rates.</li>
+        <li>Use the card for local payments or collect cash from partner banks.</li>
+      </ol>
+    </section>
+
+    <section id="features" class="container features">
+      <h3>Key features</h3>
+      <ul>
+        <li>Visa-based secure login & verification</li>
+        <li>Temporary virtual debit cards (INR)</li>
+        <li>Automatic conversion from your home currency at official rates</li>
+        <li>Cash collection from partnered banks</li>
+        <li>Transaction history and spending controls</li>
+      </ul>
+    </section>
+
+    <section id="visa" class="container visa-section">
+      <h3>Sign in with your visa</h3>
+
+      <form id="visa-form" class="card form-card">
+        <label for="fullName">Full name</label>
+        <input id="fullName" name="fullName" required placeholder="As it appears on visa" />
+
+        <label for="country">Home country</label>
+        <input id="country" name="country" required placeholder="Country (e.g., USA)" />
+
+        <label for="visaNumber">Visa number</label>
+        <input id="visaNumber" name="visaNumber" required placeholder="E.g., AB1234567" />
+
+        <label for="passport">Passport number</label>
+        <input id="passport" name="passport" required placeholder="Passport number" />
+
+        <label for="homeCurrency">Home currency (3-letter ISO)</label>
+        <input id="homeCurrency" name="homeCurrency" required placeholder="USD, EUR, GBP..." />
+
+        <div class="form-actions">
+          <button type="submit" class="btn">Verify & Get Card</button>
+        </div>
+
+        <p id="visa-feedback" class="feedback" aria-live="polite"></p>
+      </form>
+
+      <aside id="conversion-panel" class="card conversion-card" aria-live="polite">
+        <h4>Currency conversion</h4>
+        <div class="conv-row">
+          <label for="amount">Amount (home currency)</label>
+          <input id="amount" type="number" min="1" value="100" />
+        </div>
+        <div class="conv-row">
+          <button id="convertBtn" class="btn small">Convert to INR</button>
+        </div>
+        <p id="conv-result">Converted amount will appear here.</p>
+        <small class="note">Uses official RBI/government-aligned exchange rate (server-supplied).</small>
+      </aside>
+    </section>
+
+    <section class="container actions-section">
+      <h3>Your card & actions</h3>
+      <div id="card-area" class="card-area">
+        <!-- Populated by JS after success -->
+      </div>
+    </section>
+
+    <section class="container faq">
+      <h3>Security & Compliance</h3>
+      <p>For production you must implement server-side visa verification, KYC checks, secure card issuance with PCI DSS compliance, and fetch government exchange rates from an approved source. This demo simulates those steps on the frontend.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>TravelIN — demo UI. Integrate with secure server-side APIs for production.</small>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
