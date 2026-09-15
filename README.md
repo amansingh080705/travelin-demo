@@ -8,7 +8,7 @@ Submit your visa, receive a temporary virtual INR debit card, and make payments 
 ---
 
 ## 🚀 Live Demo  
-🔗 [TravelIN Demo](https://amansingh080705.github.io/travelin-demo/)  
+🔗 [Open the TravelIN Website](https://amansingh080705.github.io/travelin-demo/)  
 
 ---
 
