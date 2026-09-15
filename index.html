@@ -7,6 +7,55 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <section id="auth-screen" class="auth-screen">
+    <div class="auth-layout">
+      <div class="auth-intro">
+        <p class="eyebrow">TravelIN / secure travel wallet</p>
+        <h1>Spend in India with confidence.</h1>
+        <p class="auth-copy">A simple home for your temporary INR card, local payments, and cash access while you travel.</p>
+        <div class="auth-mini-card" aria-hidden="true">
+          <span>TravelIN</span>
+          <strong>XXXX&nbsp;&nbsp;XXXX&nbsp;&nbsp;XXXX&nbsp;&nbsp;XXXX</strong>
+          <small>TEMPORARY VIRTUAL INR CARD</small>
+        </div>
+      </div>
+
+      <div class="auth-panel">
+        <div class="auth-brand"><span class="brand-mark">T</span><span>TravelIN</span></div>
+        <div class="auth-tabs" role="tablist" aria-label="Account access">
+          <button id="login-tab" class="auth-tab is-active" type="button" role="tab" aria-selected="true">Log in</button>
+          <button id="signup-tab" class="auth-tab" type="button" role="tab" aria-selected="false">Sign up</button>
+        </div>
+
+        <form id="login-form" class="auth-form" novalidate>
+          <h2>Welcome back</h2>
+          <p class="auth-form-copy">Log in to continue to your TravelIN wallet.</p>
+          <label for="login-email">Email address</label>
+          <input id="login-email" type="email" autocomplete="email" required placeholder="you@example.com" />
+          <label for="login-password">Password</label>
+          <input id="login-password" type="password" autocomplete="current-password" required minlength="6" placeholder="At least 6 characters" />
+          <button class="btn auth-submit" type="submit">Log in</button>
+          <p id="login-feedback" class="auth-feedback" aria-live="polite"></p>
+        </form>
+
+        <form id="signup-form" class="auth-form is-hidden" novalidate>
+          <h2>Create your account</h2>
+          <p class="auth-form-copy">Set up your TravelIN wallet in a few seconds.</p>
+          <label for="signup-name">Full name</label>
+          <input id="signup-name" type="text" autocomplete="name" required placeholder="Your full name" />
+          <label for="signup-email">Email address</label>
+          <input id="signup-email" type="email" autocomplete="email" required placeholder="you@example.com" />
+          <label for="signup-password">Password</label>
+          <input id="signup-password" type="password" autocomplete="new-password" required minlength="6" placeholder="At least 6 characters" />
+          <button class="btn auth-submit" type="submit">Create account</button>
+          <p id="signup-feedback" class="auth-feedback" aria-live="polite"></p>
+        </form>
+        <small class="auth-note">Demo access only. Do not use real passwords or personal documents.</small>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-shell" class="app-shell">
   <header class="site-header">
     <div class="container header-inner">
       <h1 class="logo">TravelIN</h1>
@@ -14,6 +63,7 @@
         <a href="#how">How it works</a>
         <a href="#features">Features</a>
         <a href="#visa">Sign in</a>
+        <button id="logout-btn" class="nav-logout" type="button">Log out</button>
       </nav>
     </div>
   </header>
@@ -25,6 +75,30 @@
           <h2>Spend in India. Simple. Secure. RBI-aligned.</h2>
           <p>Submit your visa, get a temporary virtual INR debit card, pay locally or withdraw cash from partners — all at official government exchange rates.</p>
           <a class="btn" href="#visa">Get started</a>
+          <div class="currency-ticker" aria-label="Supported currencies">
+            <div class="currency-ticker-track">
+              <div class="currency-chip"><span class="currency-symbol">$</span><span>USD</span></div>
+              <div class="currency-chip"><span class="currency-symbol">€</span><span>EUR</span></div>
+              <div class="currency-chip"><span class="currency-symbol">£</span><span>GBP</span></div>
+              <div class="currency-chip"><span class="currency-symbol">¥</span><span>JPY</span></div>
+              <div class="currency-chip"><span class="currency-symbol">A$</span><span>AUD</span></div>
+              <div class="currency-chip"><span class="currency-symbol">C$</span><span>CAD</span></div>
+              <div class="currency-chip"><span class="currency-symbol">₹</span><span>INR</span></div>
+              <div class="currency-chip"><span class="currency-symbol">₩</span><span>KRW</span></div>
+              <div class="currency-chip"><span class="currency-symbol">R</span><span>ZAR</span></div>
+              <div class="currency-chip"><span class="currency-symbol">د.إ</span><span>AED</span></div>
+              <div class="currency-chip"><span class="currency-symbol">$</span><span>USD</span></div>
+              <div class="currency-chip"><span class="currency-symbol">€</span><span>EUR</span></div>
+              <div class="currency-chip"><span class="currency-symbol">£</span><span>GBP</span></div>
+              <div class="currency-chip"><span class="currency-symbol">¥</span><span>JPY</span></div>
+              <div class="currency-chip"><span class="currency-symbol">A$</span><span>AUD</span></div>
+              <div class="currency-chip"><span class="currency-symbol">C$</span><span>CAD</span></div>
+              <div class="currency-chip"><span class="currency-symbol">₹</span><span>INR</span></div>
+              <div class="currency-chip"><span class="currency-symbol">₩</span><span>KRW</span></div>
+              <div class="currency-chip"><span class="currency-symbol">R</span><span>ZAR</span></div>
+              <div class="currency-chip"><span class="currency-symbol">د.إ</span><span>AED</span></div>
+            </div>
+          </div>
         </div>
         <div class="hero-card" id="virtual-card-preview">
           <!-- Virtual card preview will populate here -->
@@ -34,23 +108,44 @@
     </section>
 
     <section id="how" class="container how-it-works">
-      <h3>How it works</h3>
-      <ol>
-        <li>Sign in with visa details — we verify your eligibility (RBI-compliant KYC flow).</li>
-        <li>We create a temporary virtual debit card loaded in INR at official exchange rates.</li>
-        <li>Use the card for local payments or collect cash from partner banks.</li>
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Your journey, simplified</span>
+          <h3>How it works</h3>
+        </div>
+        <p>From visa check to your first local payment, everything stays clear and in one place.</p>
+      </div>
+      <ol class="journey-steps">
+        <li class="journey-step">
+          <span class="step-number">01</span>
+          <div><h4>Verify your visa</h4><p>Share your travel details and confirm your eligibility through a guided check.</p></div>
+        </li>
+        <li class="journey-step">
+          <span class="step-number">02</span>
+          <div><h4>Get your INR card</h4><p>Receive a temporary virtual card with conversion rates shown before you pay.</p></div>
+        </li>
+        <li class="journey-step">
+          <span class="step-number">03</span>
+          <div><h4>Pay your way</h4><p>Use it for local payments or request cash from a partnered bank.</p></div>
+        </li>
       </ol>
     </section>
 
     <section id="features" class="container features">
-      <h3>Key features</h3>
-      <ul>
-        <li>Visa-based secure login & verification</li>
-        <li>Temporary virtual debit cards (INR)</li>
-        <li>Automatic conversion from your home currency at official rates</li>
-        <li>Cash collection from partnered banks</li>
-        <li>Transaction history and spending controls</li>
-      </ul>
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Built for the journey</span>
+          <h3>Key features</h3>
+        </div>
+        <p>Everything you need to move through India with less friction and more control.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-item"><span class="feature-icon">✓</span><h4>Visa verification</h4><p>A guided sign-in flow built around your travel documents.</p></article>
+        <article class="feature-item"><span class="feature-icon">▣</span><h4>Virtual INR card</h4><p>A temporary card ready for everyday local spending.</p></article>
+        <article class="feature-item"><span class="feature-icon">↔</span><h4>Clear conversion</h4><p>See live exchange rates before converting your money.</p></article>
+        <article class="feature-item"><span class="feature-icon">⌂</span><h4>Cash access</h4><p>Request cash collection through trusted partner banks.</p></article>
+        <article class="feature-item"><span class="feature-icon">◷</span><h4>Spending overview</h4><p>Keep your card balance and activity easy to follow.</p></article>
+      </div>
     </section>
 
     <section id="visa" class="container visa-section">
@@ -69,8 +164,12 @@
         <label for="passport">Passport number</label>
         <input id="passport" name="passport" required placeholder="Passport number" />
 
-        <label for="homeCurrency">Home currency (3-letter ISO)</label>
-        <input id="homeCurrency" name="homeCurrency" required placeholder="USD, EUR, GBP..." />
+        <label for="homeCurrency">Home currency</label>
+        <select id="homeCurrency" name="homeCurrency" required>
+          <option value="">Select your currency</option>
+        </select>
+        <small id="currency-rate" class="currency-rate">Choose a currency to see its INR exchange rate.</small>
+        <small id="rates-status" class="rates-status" aria-live="polite">Loading live rates...</small>
 
         <div class="form-actions">
           <button type="submit" class="btn">Verify & Get Card</button>
@@ -111,6 +210,7 @@
       <small>TravelIN — demo UI. Integrate with secure server-side APIs for production.</small>
     </div>
   </footer>
+  </div>
 
   <script src="app.js"></script>
 </body>
