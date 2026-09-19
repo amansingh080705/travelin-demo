@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TravelIN - Card Action</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #18212f;
+    }
+    .page-wrap {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 16px 40px rgba(12, 28, 52, 0.08);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .title {
+      font-size: 2rem;
+      margin: 0;
+    }
+    .tag {
+      background: #e9f8f0;
+      color: #0f8a5f;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .info-box {
+      background: #f7f9fc;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #ebeff7;
+    }
+    .label {
+      display: block;
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+    .actions {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .field-group {
+      margin-top: 20px;
+      display: grid;
+      gap: 12px;
+    }
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+    .field label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .field input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #dbe4f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .field input:focus {
+      border-color: #1f6feb;
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+    }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #1f6feb;
+      color: white;
+      font-weight: 700;
+    }
+    .btn.secondary {
+      background: #edf3ff;
+      color: #183b7a;
+    }
+    .muted {
+      color: #64748b;
+      margin-top: 18px;
+      line-height: 1.6;
+    }
+    .status-box {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      min-height: 60px;
+      display: none;
+    }
+    .status-box.visible {
+      display: flex;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .slip-box {
+      margin-top: 22px;
+      padding: 18px 18px 16px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid #dfe8f5;
+      display: none;
+    }
+    .slip-box.visible {
+      display: block;
+    }
+    .slip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 700;
+      color: #10243f;
+    }
+    .slip-grid {
+      display: grid;
+      gap: 8px;
+      color: #334155;
+      font-size: 0.96rem;
+    }
+    .slip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+    .slip-row strong {
+      color: #0f172a;
+    }
+    .spinner {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 3px solid rgba(31, 111, 235, 0.15);
+      border-top-color: #1f6feb;
+      animation: spin 0.9s linear infinite;
+    }
+    .status-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: none;
+    }
+    .status-icon.success {
+      background: rgba(16, 185, 129, 0.12);
+      color: #0f9f6e;
+      display: inline-flex;
+    }
+    .status-icon.error {
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+      display: inline-flex;
+    }
+    .status-text {
+      font-weight: 700;
+      color: #18212f;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="card">
+      <div class="header">
+        <h1 class="title" id="page-title">Pay via app</h1>
+        <span class="tag" id="status-tag">Ready</span>
+      </div>
+
+      <div class="two-col">
+        <div class="info-box">
+          <span class="label">Cardholder</span>
+          <div class="value" id="holder-name">-</div>
+        </div>
+        <div class="info-box">
+          <span class="label">Card number</span>
+          <div class="value" id="card-number">-</div>
+        </div>
+        <div class="info-box">
+          <span class="label">Current INR balance</span>
+          <div class="value" id="card-balance">-</div>
+        </div>
+        <div class="info-box">
+          <span class="label">Home currency</span>
+          <div class="value" id="currency-code">-</div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field">
+          <label for="payment-amount">Amount</label>
+          <input id="payment-amount" type="text" inputmode="decimal" placeholder="Enter amount" />
+        </div>
+        <div class="field" id="account-field">
+          <label for="account-number">Account number</label>
+          <input id="account-number" type="text" inputmode="numeric" maxlength="18" placeholder="Enter account number" />
+        </div>
+        <div class="field hidden" id="bank-field">
+          <label for="bank-name">Bank</label>
+          <select id="bank-name">
+            <option value="">Select a bank</option>
+            <option value="State Bank of India">State Bank of India</option>
+            <option value="HDFC Bank">HDFC Bank</option>
+            <option value="ICICI Bank">ICICI Bank</option>
+            <option value="Axis Bank">Axis Bank</option>
+            <option value="Bank of Baroda">Bank of Baroda</option>
+            <option value="Punjab National Bank">Punjab National Bank</option>
+            <option value="Canara Bank">Canara Bank</option>
+            <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+            <option value="Yes Bank">Yes Bank</option>
+            <option value="IndusInd Bank">IndusInd Bank</option>
+            <option value="Union Bank of India">Union Bank of India</option>
+            <option value="Bank of India">Bank of India</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="pickup-slip" class="slip-box" aria-live="polite"></div>
+
+      <div class="actions">
+        <button class="btn hidden" id="generate-slip" type="button">Generate slip</button>
+        <button class="btn" id="primary-action" type="button">Continue</button>
+        <button class="btn secondary" id="back-button" type="button">Back to card</button>
+      </div>
+
+      <div id="payment-status" class="status-box" aria-live="polite">
+        <div id="status-spinner" class="spinner" aria-hidden="true"></div>
+        <div id="status-icon" class="status-icon success" aria-hidden="true">✓</div>
+        <div id="status-icon-error" class="status-icon error" aria-hidden="true">✕</div>
+        <div id="status-text" class="status-text">Waiting for payment</div>
+      </div>
+
+      <p class="muted" id="details-text">
+        This demo page simulates the selected travel wallet action and can be connected to your payment or partner bank workflow.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action') || 'pay';
+    const holder = decodeURIComponent(params.get('holder') || '');
+    const number = decodeURIComponent(params.get('number') || '');
+    let balance = Number(params.get('balance') || 0);
+    const currency = (params.get('currency') || 'INR').toUpperCase();
+
+    const titleEl = document.getElementById('page-title');
+    const statusTag = document.getElementById('status-tag');
+    const holderEl = document.getElementById('holder-name');
+    const cardEl = document.getElementById('card-number');
+    const balanceEl = document.getElementById('card-balance');
+    const currencyEl = document.getElementById('currency-code');
+    const detailsText = document.getElementById('details-text');
+    const primaryAction = document.getElementById('primary-action');
+    const statusBox = document.getElementById('payment-status');
+    const statusSpinner = document.getElementById('status-spinner');
+    const statusSuccess = document.getElementById('status-icon');
+    const statusError = document.getElementById('status-icon-error');
+    const statusText = document.getElementById('status-text');
+    const amountInput = document.getElementById('payment-amount');
+    const accountInput = document.getElementById('account-number');
+    const accountField = document.getElementById('account-field');
+    const bankField = document.getElementById('bank-field');
+    const bankSelect = document.getElementById('bank-name');
+    const generateSlipBtn = document.getElementById('generate-slip');
+    const slipBox = document.getElementById('pickup-slip');
+
+    const bankRates = {
+      AED: 22.46, AUD: 50.4, BDT: 0.75, BRL: 16.51, CAD: 61.8, CHF: 104.62,
+      CNY: 11.55, DKK: 13.82, EGP: 1.72, EUR: 103.49, GBP: 103.25, HKD: 10.58,
+      IDR: 0.0052, ILS: 22.68, JPY: 0.56, KRW: 0.061, LKR: 0.28, MYR: 19.52,
+      NOK: 8.78, NZD: 47.08, PHP: 1.48, PKR: 0.30, QAR: 22.67, RUB: 0.92,
+      SAR: 22.00, SEK: 8.98, SGD: 64.4, THB: 2.58, TRY: 2.33, USD: 82.5,
+      VND: 0.0033, ZAR: 4.57, INR: 1
+    };
+
+    function showStatus({ type, message }) {
+      statusBox.classList.add('visible');
+      statusSpinner.style.display = type === 'loading' ? 'block' : 'none';
+      statusSuccess.style.display = type === 'success' ? 'inline-flex' : 'none';
+      statusError.style.display = type === 'error' ? 'inline-flex' : 'none';
+      statusText.textContent = message;
+    }
+
+    function sanitizeAmount(value) {
+      return value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1');
+    }
+
+    function sanitizeAccountNumber(value) {
+      return value.replace(/\D/g, '');
+    }
+
+    function formatInr(value) {
+      return `₹${Number(value || 0).toFixed(2)}`;
+    }
+
+    function getCurrencyRate(code) {
+      return bankRates[(code || '').toUpperCase()] || 1;
+    }
+
+    function renderPickupSlip() {
+      const bankName = bankSelect.value;
+      const enteredAmount = Number(amountInput.value);
+
+      if (!bankName) {
+        slipBox.classList.remove('visible');
+        return;
+      }
+
+      if (!amountInput.value || Number.isNaN(enteredAmount) || enteredAmount <= 0) {
+        slipBox.classList.remove('visible');
+        return;
+      }
+
+      const rate = getCurrencyRate(currency);
+      const commission = enteredAmount * 0.03;
+      const netAmount = enteredAmount - commission;
+      const foreignEquivalent = rate ? (enteredAmount / rate) : enteredAmount;
+      const netEquivalent = rate ? (netAmount / rate) : netAmount;
+
+      slipBox.innerHTML = `
+        <div class="slip-header">
+          <span>Cash Pickup Slip</span>
+          <span>${bankName}</span>
+        </div>
+        <div class="slip-grid">
+          <div class="slip-row"><span>Withdrawal amount</span><strong>${formatInr(enteredAmount)}</strong></div>
+          <div class="slip-row"><span>Bank name</span><strong>${bankName}</strong></div>
+          <div class="slip-row"><span>Exchange rate</span><strong>1 ${currency} = ₹${rate.toFixed(2)} INR</strong></div>
+          <div class="slip-row"><span>Equivalent in ${currency}</span><strong>${foreignEquivalent.toFixed(2)} ${currency}</strong></div>
+          <div class="slip-row"><span>Bank commission (3%)</span><strong>${formatInr(commission)}</strong></div>
+          <div class="slip-row"><span>Net payout</span><strong>${formatInr(netAmount)}</strong></div>
+          <div class="slip-row"><span>Net equivalent in ${currency}</span><strong>${netEquivalent.toFixed(2)} ${currency}</strong></div>
+        </div>
+      `;
+      slipBox.classList.add('visible');
+    }
+
+    function generatePickupToken() {
+      const randomNumber = Math.floor(10000 + Math.random() * 90000);
+      return `#${randomNumber}`;
+    }
+
+    function updateStoredBalance(newBalance) {
+      try {
+        const raw = localStorage.getItem('travelinCardState');
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (!saved || !saved.card) return;
+        saved.card.balanceINR = Number(newBalance);
+        localStorage.setItem('travelinCardState', JSON.stringify(saved));
+        sessionStorage.setItem('travelinCardState', JSON.stringify(saved));
+      } catch (error) {
+        // Ignore storage errors in demo mode.
+      }
+    }
+
+    function syncCardBalanceFromStorage() {
+      try {
+        const raw = localStorage.getItem('travelinCardState');
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (!saved || !saved.card) return;
+        const updatedBalance = Number(saved.card.balanceINR || 0);
+        balanceEl.textContent = `₹${updatedBalance.toFixed(2)}`;
+        balance = updatedBalance;
+      } catch (error) {
+        // Ignore storage errors in demo mode.
+      }
+    }
+
+    amountInput.addEventListener('input', () => {
+      amountInput.value = sanitizeAmount(amountInput.value);
+    });
+
+    accountInput.addEventListener('input', () => {
+      accountInput.value = sanitizeAccountNumber(accountInput.value).slice(0, 18);
+    });
+
+    if (action === 'pickup') {
+      titleEl.textContent = 'Request cash pickup';
+      statusTag.textContent = 'Pickup ready';
+      detailsText.textContent = 'Your cash pickup request has been prepared. In production, this step would connect to a network of partner banks and verify the pickup branch, contact details, and collection window.';
+      primaryAction.textContent = 'Submit pickup request';
+      accountField.classList.add('hidden');
+      bankField.classList.remove('hidden');
+      generateSlipBtn.classList.remove('hidden');
+    } else {
+      titleEl.textContent = 'Pay via app';
+      statusTag.textContent = 'Payment ready';
+      detailsText.textContent = 'This flow prepares your TravelIN virtual card for a merchant payment. In production, it would trigger the secure payment authorization and tokenization flow.';
+      primaryAction.textContent = 'Approve payment';
+      accountField.classList.remove('hidden');
+      bankField.classList.add('hidden');
+      generateSlipBtn.classList.add('hidden');
+      slipBox.classList.remove('visible');
+    }
+
+    holderEl.textContent = holder || 'Not available';
+    cardEl.textContent = number || 'Not available';
+    syncCardBalanceFromStorage();
+    const savedAmount = localStorage.getItem('travelinLastPaymentAmount');
+    if (savedAmount && Number(savedAmount) > 0) {
+      amountInput.value = savedAmount;
+    }
+    currencyEl.textContent = currency || 'INR';
+
+    amountInput.addEventListener('input', () => {
+      if (action === 'pickup') {
+        renderPickupSlip();
+      }
+    });
+
+    bankSelect.addEventListener('change', () => {
+      if (action === 'pickup') {
+        renderPickupSlip();
+      }
+    });
+
+    generateSlipBtn.addEventListener('click', () => {
+      if (action !== 'pickup') return;
+      renderPickupSlip();
+    });
+
+    primaryAction.addEventListener('click', () => {
+      const enteredAmount = Number(amountInput.value);
+
+      if (!amountInput.value || Number.isNaN(enteredAmount) || enteredAmount <= 0) {
+        showStatus({ type: 'error', message: 'Amount must be greater than 0.' });
+        amountInput.focus();
+        return;
+      }
+
+      if (action !== 'pickup') {
+        const cleanedAccount = sanitizeAccountNumber(accountInput.value);
+
+        if (cleanedAccount.length < 9 || cleanedAccount.length > 18) {
+          showStatus({ type: 'error', message: 'Account number must be between 9 and 18 digits.' });
+          accountInput.focus();
+          return;
+        }
+
+        if (cleanedAccount !== accountInput.value) {
+          showStatus({ type: 'error', message: 'Account number should contain only digits.' });
+          accountInput.focus();
+          return;
+        }
+      }
+
+      if (action === 'pickup') {
+        const selectedBank = bankSelect.value;
+        if (!selectedBank) {
+          showStatus({ type: 'error', message: 'Please select a bank.' });
+          bankSelect.focus();
+          return;
+        }
+        renderPickupSlip();
+        showStatus({ type: 'loading', message: 'Processing pickup request...' });
+        setTimeout(() => {
+          const token = generatePickupToken();
+          slipBox.innerHTML += `
+            <div class="slip-row" style="margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;">
+              <span>Bank token</span>
+              <strong>${token}</strong>
+            </div>
+          `;
+          showStatus({ type: 'success', message: `Pickup request successful • Token ${token}` });
+        }, 1200);
+        return;
+      }
+
+      if (enteredAmount > Number(balance || 0)) {
+        showStatus({ type: 'loading', message: 'Checking account balance...' });
+        setTimeout(() => {
+          showStatus({ type: 'error', message: 'Payment unsuccessful: insufficient balance' });
+        }, 1200);
+        return;
+      }
+
+      showStatus({ type: 'loading', message: 'Approving payment...' });
+      setTimeout(() => {
+        const updatedBalance = Number(balance || 0) - enteredAmount;
+        balance = updatedBalance;
+        balanceEl.textContent = `₹${updatedBalance.toFixed(2)}`;
+        updateStoredBalance(updatedBalance);
+        localStorage.setItem('travelinLastPaymentAmount', String(enteredAmount));
+        showStatus({ type: 'success', message: 'Payment successful' });
+      }, 1200);
+    });
+
+    document.getElementById('back-button').addEventListener('click', () => {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'index.html#visa';
+      }
+    });
+  </script>
+</body>
+</html>

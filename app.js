@@ -23,6 +23,19 @@
     element.classList.toggle('is-error', Boolean(isError))
   }
 
+  function isValidFullName(name){
+    return /^[A-Za-z ]+$/.test(name)
+  }
+
+  function isValidEmail(email){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)
+  }
+
+  function isValidPassportNumber(value){
+    const cleaned = value.trim()
+    return cleaned.length >= 4 && cleaned.length <= 9
+  }
+
   function showApp(user){
     authScreen.classList.add('is-hidden')
     appShell.classList.add('is-visible')
@@ -32,6 +45,86 @@
   function showAuth(){
     authScreen.classList.remove('is-hidden')
     appShell.classList.remove('is-visible')
+  }
+
+  function getStoredCardState(){
+    const raw = sessionStorage.getItem('travelinCardState') || localStorage.getItem('travelinCardState')
+    if(!raw) return null
+    try {
+      const saved = JSON.parse(raw)
+      return saved && saved.card && saved.userData ? saved : null
+    } catch (error) {
+      return null
+    }
+  }
+
+  function persistCardState(card, userData){
+    if(!card || !userData) return
+    const payload = JSON.stringify({
+      card,
+      userData,
+      homeCurrency: homeCurrencyInput ? homeCurrencyInput.value : ''
+    })
+    sessionStorage.setItem('travelinCardState', payload)
+    localStorage.setItem('travelinCardState', payload)
+  }
+
+  function restoreCardState(){
+    const saved = getStoredCardState()
+    if(!saved) return false
+    try {
+      const { card, userData } = saved
+
+      if(saved.homeCurrency && homeCurrencyInput){
+        homeCurrencyInput.value = saved.homeCurrency
+        homeCurrencyInput.dispatchEvent(new Event('change'))
+      }
+
+      renderCard(saved.card, saved.userData)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  window.addEventListener('pageshow', () => {
+    const restored = restoreCardState()
+    if(!restored && !cardArea.innerHTML.trim()) {
+      renderEmptyCardState()
+    }
+  })
+
+  function renderEmptyCardState(){
+    cardArea.innerHTML = `
+      <div class="card-empty-state" aria-live="polite">
+        <div class="empty-state-header">
+          <span class="empty-status-pill">Awaiting verification</span>
+          <span class="empty-state-chip">Temporary INR card</span>
+        </div>
+
+        <div class="empty-card-visual" aria-hidden="true">
+          <div class="empty-card-topline">
+            <span>TravelIN</span>
+            <span>Temp • INR</span>
+          </div>
+          <div class="empty-card-label">Temporary Virtual Card</div>
+          <div class="empty-card-number">XXXX XXXX XXXX XXXX</div>
+          <div class="empty-card-footer">
+            <span>Travel valid</span>
+            <span>RBI demo</span>
+          </div>
+        </div>
+
+        <h4>Your temporary TravelIN card is waiting to be issued</h4>
+        <p>Complete visa verification to unlock your temporary virtual INR debit card for local payments, top-ups, and cash pickup while you travel.</p>
+
+        <div class="empty-state-features">
+          <span>✓ Visa review</span>
+          <span>✓ Temporary card</span>
+          <span>✓ Cash access</span>
+        </div>
+      </div>
+    `
   }
 
   function switchAuthMode(mode){
@@ -47,12 +140,25 @@
   loginTab.addEventListener('click', ()=>switchAuthMode('login'))
   signupTab.addEventListener('click', ()=>switchAuthMode('signup'))
 
+  document.querySelectorAll('.password-toggle').forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = document.getElementById(button.dataset.target)
+      if (!target) return
+      const isPassword = target.type === 'password'
+      target.type = isPassword ? 'text' : 'password'
+      button.textContent = isPassword ? '🙈' : '👁'
+      button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password')
+    })
+  })
+
   signupForm.addEventListener('submit', (event)=>{
     event.preventDefault()
     const name = $('#signup-name').value.trim()
     const email = $('#signup-email').value.trim().toLowerCase()
     const password = $('#signup-password').value
     if(!name || !email || !password){ setFeedback(signupFeedback, 'Please complete all fields.', true); return }
+    if(!isValidFullName(name)){ setFeedback(signupFeedback, 'Full name must contain letters and spaces only.', true); return }
+    if(!isValidEmail(email)){ setFeedback(signupFeedback, 'Enter a valid email address, such as name@gmail.com.', true); return }
     if(password.length < 6){ setFeedback(signupFeedback, 'Your password must be at least 6 characters.', true); return }
     const users = readUsers()
     if(users.some(user => user.email === email)){ setFeedback(signupFeedback, 'An account with this email already exists. Log in instead.', true); return }
@@ -75,9 +181,12 @@
 
   logoutBtn.addEventListener('click', ()=>{
     localStorage.removeItem('travelinSession')
+    sessionStorage.removeItem('travelinCardState')
+    localStorage.removeItem('travelinCardState')
     loginForm.reset()
     signupForm.reset()
     setFeedback(loginFeedback, '')
+    renderEmptyCardState()
     showAuth()
     switchAuthMode('login')
   })
@@ -95,6 +204,9 @@
 
   // Elements
   const visaForm = $('#visa-form')
+  const fullNameInput = $('#fullName')
+  const visaNumberInput = $('#visaNumber')
+  const passportInput = $('#passport')
   const feedback = $('#visa-feedback')
   const cardArea = $('#card-area')
   const virtualCardPreview = $('#virtual-card-preview')
@@ -102,25 +214,122 @@
   const amountInput = $('#amount')
   const convResult = $('#conv-result')
   const homeCurrencyInput = $('#homeCurrency')
+  const countryInput = $('#country')
+  const countryOptions = $('#country-options')
   const currencyRate = $('#currency-rate')
   const ratesStatus = $('#rates-status')
 
+  ;[fullNameInput, visaNumberInput, passportInput].forEach((input) => {
+    if (!input) return
+    input.addEventListener('input', () => {
+      input.value = input.value.toUpperCase()
+    })
+  })
+
+  const countryNames = [
+    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
+    'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+    'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cambodia',
+    'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica',
+    'Croatia', 'Cuba', 'Cyprus', 'Czechia', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
+    'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon',
+    'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana',
+    'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel',
+    'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kuwait', 'Kyrgyzstan', 'Laos',
+    'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi',
+    'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova',
+    'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands',
+    'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan', 'Palau',
+    'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia',
+    'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia',
+    'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Korea', 'South Sudan',
+    'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania',
+    'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda',
+    'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam',
+    'Yemen', 'Zambia', 'Zimbabwe'
+  ]
+
+  countryNames.forEach((countryName)=>{
+    const option = document.createElement('option')
+    option.value = countryName
+    countryOptions.appendChild(option)
+  })
+
+  function isValidCountry(country){
+    return countryNames.some((countryName) => countryName.toLowerCase() === country.trim().toLowerCase())
+  }
+
+  const countryCurrencyMap = {
+    Afghanistan: 'AFN', Albania: 'ALL', Algeria: 'DZD', Andorra: 'EUR', Angola: 'AOA',
+    'Antigua and Barbuda': 'XCD', Argentina: 'ARS', Armenia: 'AMD', Australia: 'AUD', Austria: 'EUR',
+    Azerbaijan: 'AZN', Bahamas: 'BSD', Bahrain: 'BHD', Bangladesh: 'BDT', Barbados: 'BBD', Belarus: 'BYN',
+    Belgium: 'EUR', Belize: 'BZD', Benin: 'XOF', Bhutan: 'BTN', Bolivia: 'BOB',
+    'Bosnia and Herzegovina': 'BAM', Botswana: 'BWP', Brazil: 'BRL', Brunei: 'BND', Bulgaria: 'BGN',
+    'Burkina Faso': 'XOF', Burundi: 'BIF', 'Cabo Verde': 'CVE', Cambodia: 'KHR', Cameroon: 'XAF',
+    Canada: 'CAD', 'Central African Republic': 'XAF', Chad: 'XAF', Chile: 'CLP', China: 'CNY',
+    Colombia: 'COP', Comoros: 'KMF', Congo: 'XAF', 'Costa Rica': 'CRC', Croatia: 'EUR', Cuba: 'CUP',
+    Cyprus: 'EUR', Czechia: 'CZK', Denmark: 'DKK', Djibouti: 'DJF', Dominica: 'XCD',
+    'Dominican Republic': 'DOP', Ecuador: 'USD', Egypt: 'EGP', 'El Salvador': 'USD',
+    'Equatorial Guinea': 'XAF', Eritrea: 'ERN', Estonia: 'EUR', Eswatini: 'SZL', Ethiopia: 'ETB',
+    Fiji: 'FJD', Finland: 'EUR', France: 'EUR', Gabon: 'XAF', Gambia: 'GMD', Georgia: 'GEL', Germany: 'EUR',
+    Ghana: 'GHS', Greece: 'EUR', Grenada: 'XCD', Guatemala: 'GTQ', Guinea: 'GNF', 'Guinea-Bissau': 'XOF',
+    Guyana: 'GYD', Haiti: 'HTG', Honduras: 'HNL', Hungary: 'HUF', Iceland: 'ISK', India: 'INR',
+    Indonesia: 'IDR', Iran: 'IRR', Iraq: 'IQD', Ireland: 'EUR', Israel: 'ILS', Italy: 'EUR', Jamaica: 'JMD',
+    Japan: 'JPY', Jordan: 'JOD', Kazakhstan: 'KZT', Kenya: 'KES', Kiribati: 'AUD', Kuwait: 'KWD',
+    Kyrgyzstan: 'KGS', Laos: 'LAK', Latvia: 'EUR', Lebanon: 'LBP', Lesotho: 'LSL', Liberia: 'LRD',
+    Libya: 'LYD', Liechtenstein: 'CHF', Lithuania: 'EUR', Luxembourg: 'EUR', Madagascar: 'MGA', Malawi: 'MWK',
+    Malaysia: 'MYR', Maldives: 'MVR', Mali: 'XOF', Malta: 'EUR', 'Marshall Islands': 'USD', Mauritania: 'MRU',
+    Mauritius: 'MUR', Mexico: 'MXN', Micronesia: 'USD', Moldova: 'MDL', Monaco: 'EUR', Mongolia: 'MNT',
+    Montenegro: 'EUR', Morocco: 'MAD', Mozambique: 'MZN', Myanmar: 'MMK', Namibia: 'NAD', Nauru: 'AUD',
+    Nepal: 'NPR', Netherlands: 'EUR', 'New Zealand': 'NZD', Nicaragua: 'NIO', Niger: 'XOF', Nigeria: 'NGN',
+    'North Korea': 'KPW', 'North Macedonia': 'MKD', Norway: 'NOK', Oman: 'OMR', Pakistan: 'PKR', Palau: 'USD',
+    Panama: 'USD', 'Papua New Guinea': 'PGK', Paraguay: 'PYG', Peru: 'PEN', Philippines: 'PHP', Poland: 'PLN',
+    Portugal: 'EUR', Qatar: 'QAR', Romania: 'RON', Russia: 'RUB', Rwanda: 'RWF',
+    'Saint Kitts and Nevis': 'XCD', 'Saint Lucia': 'XCD', 'Saint Vincent and the Grenadines': 'XCD',
+    Samoa: 'WST', 'San Marino': 'EUR', 'Sao Tome and Principe': 'STN', 'Saudi Arabia': 'SAR', Senegal: 'XOF',
+    Serbia: 'RSD', Seychelles: 'SCR', 'Sierra Leone': 'SLL', Singapore: 'SGD', Slovakia: 'EUR', Slovenia: 'EUR',
+    'Solomon Islands': 'SBD', Somalia: 'SOS', 'South Africa': 'ZAR', 'South Korea': 'KRW', 'South Sudan': 'SSP',
+    Spain: 'EUR', 'Sri Lanka': 'LKR', Sudan: 'SDG', Suriname: 'SRD', Sweden: 'SEK', Switzerland: 'CHF',
+    Syria: 'SYP', Taiwan: 'TWD', Tajikistan: 'TJS', Tanzania: 'TZS', Thailand: 'THB', 'Timor-Leste': 'USD',
+    Togo: 'XOF', Tonga: 'TOP', 'Trinidad and Tobago': 'TTD', Tunisia: 'TND', Turkey: 'TRY',
+    Turkmenistan: 'TMT', Tuvalu: 'AUD', Uganda: 'UGX', Ukraine: 'UAH', 'United Arab Emirates': 'AED',
+    'United Kingdom': 'GBP', 'United States': 'USD', Uruguay: 'UYU', Uzbekistan: 'UZS', Vanuatu: 'VUV',
+    'Vatican City': 'EUR', Venezuela: 'VES', Vietnam: 'VND', Yemen: 'YER', Zambia: 'ZMW', Zimbabwe: 'USD'
+  }
+
+  function selectCurrencyForCountry(){
+    const selectedCountry = countryNames.find((countryName) => countryName.toLowerCase() === countryInput.value.trim().toLowerCase())
+    const currencyCode = countryCurrencyMap[selectedCountry] || 'USD'
+    if(currencies.some(([code]) => code === currencyCode)){
+      homeCurrencyInput.value = currencyCode
+      homeCurrencyInput.dispatchEvent(new Event('change'))
+    }
+  }
+
   const currencyCatalog = [
     ['AED', 'UAE Dirham', 22.46], ['AUD', 'Australian Dollar', 50.40],
-    ['BDT', 'Bangladeshi Taka', 0.75], ['BRL', 'Brazilian Real', 16.51],
+    ['AZN', 'Azerbaijani Manat', 58.32], ['BDT', 'Bangladeshi Taka', 0.75],
+    ['BHD', 'Bahraini Dinar', 258.35], ['BND', 'Brunei Dollar', 75.18],
+    ['BRL', 'Brazilian Real', 16.51], ['BYN', 'Belarusian Ruble', 29.82],
     ['CAD', 'Canadian Dollar', 61.80], ['CHF', 'Swiss Franc', 104.62],
     ['CNY', 'Chinese Yuan', 11.55], ['DKK', 'Danish Krone', 13.82],
     ['EGP', 'Egyptian Pound', 1.72], ['EUR', 'Euro', 103.49],
-    ['GBP', 'British Pound', 103.25], ['HKD', 'Hong Kong Dollar', 10.58],
-    ['IDR', 'Indonesian Rupiah', 0.0052], ['ILS', 'Israeli New Shekel', 22.68],
-    ['JPY', 'Japanese Yen', 0.56], ['KRW', 'South Korean Won', 0.061],
-    ['LKR', 'Sri Lankan Rupee', 0.28], ['MYR', 'Malaysian Ringgit', 19.52],
+    ['GBP', 'British Pound', 103.25], ['GHS', 'Ghanaian Cedi', 6.28],
+    ['HKD', 'Hong Kong Dollar', 10.58], ['IDR', 'Indonesian Rupiah', 0.0052],
+    ['ILS', 'Israeli New Shekel', 22.68], ['JOD', 'Jordanian Dinar', 136.90],
+    ['JPY', 'Japanese Yen', 0.56], ['KES', 'Kenyan Shilling', 0.75],
+    ['KRW', 'South Korean Won', 0.061], ['KWD', 'Kuwaiti Dinar', 317.18],
+    ['LKR', 'Sri Lankan Rupee', 0.28], ['MAD', 'Moroccan Dirham', 9.99],
+    ['MYR', 'Malaysian Ringgit', 19.52], ['NGN', 'Nigerian Naira', 0.065],
     ['NOK', 'Norwegian Krone', 8.78], ['NZD', 'New Zealand Dollar', 47.08],
-    ['PHP', 'Philippine Peso', 1.48], ['PKR', 'Pakistani Rupee', 0.30],
-    ['QAR', 'Qatari Riyal', 22.67], ['RUB', 'Russian Ruble', 0.92],
-    ['SAR', 'Saudi Riyal', 22.00], ['SEK', 'Swedish Krona', 8.98],
-    ['SGD', 'Singapore Dollar', 64.40], ['THB', 'Thai Baht', 2.58],
-    ['TRY', 'Turkish Lira', 2.33], ['USD', 'US Dollar', 82.50],
+    ['OMR', 'Omani Rial', 204.38], ['PHP', 'Philippine Peso', 1.48],
+    ['PKR', 'Pakistani Rupee', 0.30], ['QAR', 'Qatari Riyal', 22.67],
+    ['RUB', 'Russian Ruble', 0.92], ['SAR', 'Saudi Riyal', 22.00],
+    ['SEK', 'Swedish Krona', 8.98], ['SGD', 'Singapore Dollar', 64.40],
+    ['THB', 'Thai Baht', 2.58], ['TND', 'Tunisian Dinar', 31.84],
+    ['TRY', 'Turkish Lira', 2.33], ['TWD', 'New Taiwan Dollar', 3.13],
+    ['UAH', 'Ukrainian Hryvnia', 2.32], ['UGX', 'Ugandan Shilling', 0.021],
+    ['USD', 'US Dollar', 82.50], ['INR', 'Indian Rupee', 1],
     ['VND', 'Vietnamese Dong', 0.0033], ['ZAR', 'South African Rand', 4.57]
   ]
   let currencies = currencyCatalog.map(([code, name, rate]) => [code, name, rate])
@@ -146,7 +355,13 @@
       : 'Choose a currency to see its INR exchange rate.'
   })
 
+  countryInput.addEventListener('change', selectCurrencyForCountry)
+  countryInput.addEventListener('input', ()=>{
+    if(isValidCountry(countryInput.value)) selectCurrencyForCountry()
+  })
+
   populateCurrencyOptions()
+  restoreCardState()
 
   async function loadLiveRates(){
     ratesStatus.textContent = 'Updating live rates...'
@@ -171,13 +386,18 @@
   function showPreview(){
     virtualCardPreview.innerHTML = `
       <div class="card-placeholder" aria-hidden="true">
-        <div style="font-weight:700">TravelIN</div>
-        <div style="font-size:12px;margin-top:14px">Temporary Virtual INR Debit Card</div>
-        <div style="margin-top:18px;font-family:monospace;letter-spacing:2px">XXXX XXXX XXXX XXXX</div>
+        <div class="preview-badge">TravelIN</div>
+        <div class="preview-title">Temporary Virtual INR Debit Card</div>
+        <div class="preview-number">XXXX XXXX XXXX XXXX</div>
+        <div class="preview-meta">
+          <span>Verified</span>
+          <span>RBI-aligned</span>
+        </div>
       </div>
     `
   }
   showPreview()
+  renderEmptyCardState()
 
   // Conversion function (uses demoRates)
   function getRateFor(currency){
@@ -198,7 +418,7 @@
       return
     }
     const inr = (amt * rate).toFixed(2)
-    convResult.innerHTML = `${amt} ${homeCur} → <strong>₹ ${inr} INR</strong> (demo rate ${rate})`
+    convResult.innerHTML = `${amt} ${homeCur} → <strong>₹ ${inr} INR</strong>`
   })
 
   // Visa form submit (demo verification).
@@ -207,11 +427,34 @@
     feedback.textContent = ''
     const form = new FormData(visaForm)
     const data = Object.fromEntries(form.entries())
+    data.fullName = (data.fullName || '').trim().toUpperCase()
+    data.visaNumber = (data.visaNumber || '').trim().toUpperCase()
+    data.passport = (data.passport || '').trim().toUpperCase()
     // naive client-side validation
+    if(getStoredCardState()){
+      feedback.textContent = 'The card is already generated.'
+      return
+    }
     if(!data.fullName || !data.visaNumber || !data.passport || !data.homeCurrency){
       feedback.textContent = 'Please fill all required fields.'
       return
     }
+    if(!isValidFullName(data.fullName.trim())){
+      feedback.textContent = 'Full name must contain letters and spaces only.'
+      return
+    }
+    if(!isValidPassportNumber(data.passport)){
+      feedback.textContent = 'Passport number must be between 4 and 9 characters.'
+      return
+    }
+    if(!isValidCountry(data.country)){
+      feedback.textContent = 'Please select a country from the list.'
+      countryInput.focus()
+      return
+    }
+    fullNameInput.value = data.fullName
+    visaNumberInput.value = data.visaNumber
+    passportInput.value = data.passport
     feedback.textContent = 'Verifying visa details (demo)...'
 
     // Demo verification workflow:
@@ -238,11 +481,13 @@
 
       // Render card + actions
       renderCard(card, data)
+      persistCardState(card, data)
       feedback.textContent = 'Card created. Ready to use (demo).'
     }, 900) // simulated latency
   })
 
   function renderCard(card, userData){
+    persistCardState(card, userData)
     cardArea.innerHTML = ''
     const cardEl = document.createElement('div')
     cardEl.className = 'virtual-card'
@@ -275,23 +520,43 @@
         alert('No demo rate for your currency. Server must provide official rate.')
         return
       }
+      if(!amt || amt <= 0){
+        alert('Enter a valid positive amount before topping up.')
+        amountInput.value = 0
+        return
+      }
       const converted = amt * rate
       // In production: call server to perform the conversion, debit user externally, credit card in INR, and record transaction.
       const balanceEl = $('#card-balance')
       const newBal = (parseFloat(card.balanceINR) + converted)
       card.balanceINR = newBal
       balanceEl.textContent = `₹${newBal.toFixed(2)}`
+      persistCardState(card, userData)
+      amountInput.value = 0
+      localStorage.removeItem('travelinLastPaymentAmount')
       alert(`Demo: Converted ${amt} ${homeCur} → ₹${converted.toFixed(2)} and loaded to card.`)
     })
 
     $('#pay-app').addEventListener('click', ()=>{
-      // In production: initiate payment flow or card tokenization for merchant.
-      alert('Demo: Pay via app flow initiated. (Integrate with payments backend / issuer.)')
+      const search = new URLSearchParams({
+        action: 'pay',
+        holder: encodeURIComponent(card.holder || ''),
+        number: encodeURIComponent(card.number || ''),
+        balance: String(card.balanceINR || 0),
+        currency: homeCurrencyInput.value || 'INR'
+      }).toString()
+      window.location.href = `card-action.html?${search}`
     })
 
     $('#withdraw').addEventListener('click', ()=>{
-      // In production: open withdrawal flow (select partner branch, hold/lock INR for pickup)
-      alert('Demo: Withdrawal request placed. (Server to coordinate partner bank payout.)')
+      const search = new URLSearchParams({
+        action: 'pickup',
+        holder: encodeURIComponent(card.holder || ''),
+        number: encodeURIComponent(card.number || ''),
+        balance: String(card.balanceINR || 0),
+        currency: homeCurrencyInput.value || 'INR'
+      }).toString()
+      window.location.href = `card-action.html?${search}`
     })
   }
 

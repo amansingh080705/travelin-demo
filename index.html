@@ -33,7 +33,10 @@
           <label for="login-email">Email address</label>
           <input id="login-email" type="email" autocomplete="email" required placeholder="you@example.com" />
           <label for="login-password">Password</label>
-          <input id="login-password" type="password" autocomplete="current-password" required minlength="6" placeholder="At least 6 characters" />
+          <div class="password-field">
+            <input id="login-password" type="password" autocomplete="current-password" required minlength="6" placeholder="At least 6 characters" />
+            <button class="password-toggle" type="button" aria-label="Show password" data-target="login-password">👁</button>
+          </div>
           <button class="btn auth-submit" type="submit">Log in</button>
           <p id="login-feedback" class="auth-feedback" aria-live="polite"></p>
         </form>
@@ -42,11 +45,14 @@
           <h2>Create your account</h2>
           <p class="auth-form-copy">Set up your TravelIN wallet in a few seconds.</p>
           <label for="signup-name">Full name</label>
-          <input id="signup-name" type="text" autocomplete="name" required placeholder="Your full name" />
+          <input id="signup-name" type="text" autocomplete="name" required pattern="[A-Za-z ]+" title="Use letters and spaces only." placeholder="Your full name" />
           <label for="signup-email">Email address</label>
-          <input id="signup-email" type="email" autocomplete="email" required placeholder="you@example.com" />
+          <input id="signup-email" type="email" autocomplete="email" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]{2,}$" title="Enter a valid email address, such as name@gmail.com" placeholder="you@example.com" />
           <label for="signup-password">Password</label>
-          <input id="signup-password" type="password" autocomplete="new-password" required minlength="6" placeholder="At least 6 characters" />
+          <div class="password-field">
+            <input id="signup-password" type="password" autocomplete="new-password" required minlength="6" placeholder="At least 6 characters" />
+            <button class="password-toggle" type="button" aria-label="Show password" data-target="signup-password">👁</button>
+          </div>
           <button class="btn auth-submit" type="submit">Create account</button>
           <p id="signup-feedback" class="auth-feedback" aria-live="polite"></p>
         </form>
@@ -60,9 +66,7 @@
     <div class="container header-inner">
       <h1 class="logo">TravelIN</h1>
       <nav class="nav">
-        <a href="#how">How it works</a>
-        <a href="#features">Features</a>
-        <a href="#visa">Sign in</a>
+        <a href="#visa" class="nav-card-link">Get Card</a>
         <button id="logout-btn" class="nav-logout" type="button">Log out</button>
       </nav>
     </div>
@@ -153,16 +157,17 @@
 
       <form id="visa-form" class="card form-card">
         <label for="fullName">Full name</label>
-        <input id="fullName" name="fullName" required placeholder="As it appears on visa" />
+        <input id="fullName" name="fullName" required pattern="[A-Za-z ]+" title="Use letters and spaces only." placeholder="As it appears on visa" />
 
         <label for="country">Home country</label>
-        <input id="country" name="country" required placeholder="Country (e.g., USA)" />
+        <input id="country" name="country" list="country-options" required autocomplete="country-name" placeholder="Enter your Country Name" />
+        <datalist id="country-options"></datalist>
 
         <label for="visaNumber">Visa number</label>
-        <input id="visaNumber" name="visaNumber" required placeholder="E.g., AB1234567" />
+        <input id="visaNumber" name="visaNumber" required minlength="7" maxlength="16" placeholder="E.g., AB1234567" />
 
         <label for="passport">Passport number</label>
-        <input id="passport" name="passport" required placeholder="Passport number" />
+        <input id="passport" name="passport" required minlength="4" maxlength="9" placeholder="Passport number" />
 
         <label for="homeCurrency">Home currency</label>
         <select id="homeCurrency" name="homeCurrency" required>
