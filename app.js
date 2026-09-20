@@ -366,14 +366,14 @@
   async function loadLiveRates(){
     ratesStatus.textContent = 'Updating live rates...'
     try {
-      const response = await fetch('/api/exchange-rates', { cache: 'no-store' })
+      const response = await fetch('https://open.er-api.com/v6/latest/INR', { cache: 'no-store' })
       if(!response.ok) throw new Error('Rates request failed')
       const data = await response.json()
       const liveRates = data.rates || {}
       currencies = currencyCatalog.map(([code, name, fallbackRate]) => [code, name, liveRates[code] || fallbackRate])
       Object.assign(demoRates, Object.fromEntries(currencies.map(([code, name, rate]) => [code, rate])))
       populateCurrencyOptions()
-      const updatedAt = data.updatedAt ? new Date(data.updatedAt).toLocaleString() : 'just now'
+      const updatedAt = data.time_last_update_utc ? new Date(data.time_last_update_utc).toLocaleString() : 'just now'
       ratesStatus.textContent = `Live rates updated ${updatedAt}`
     } catch(error) {
       ratesStatus.textContent = 'Live rates unavailable. Showing fallback demo rates.'
