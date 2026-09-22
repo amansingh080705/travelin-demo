@@ -36,10 +36,26 @@
     return cleaned.length >= 4 && cleaned.length <= 9
   }
 
+  function getCurrentSessionUser(){
+    try {
+      return JSON.parse(localStorage.getItem('travelinSession') || 'null')
+    } catch (error) {
+      return null
+    }
+  }
+
+  function clearCardState(){
+    sessionStorage.removeItem('travelinCardState')
+    localStorage.removeItem('travelinCardState')
+  }
+
   function showApp(user){
     authScreen.classList.add('is-hidden')
     appShell.classList.add('is-visible')
-    if(user){ localStorage.setItem('travelinSession', JSON.stringify(user)) }
+    if(user){
+      localStorage.setItem('travelinSession', JSON.stringify(user))
+      clearCardState()
+    }
   }
 
   function showAuth(){
@@ -52,8 +68,15 @@
     if(!raw) return null
     try {
       const saved = JSON.parse(raw)
-      return saved && saved.card && saved.userData ? saved : null
+      const currentUser = getCurrentSessionUser()
+      const sameUser = currentUser && saved.userData && saved.userData.email === currentUser.email
+      if(!saved || !saved.card || !saved.userData || !sameUser){
+        clearCardState()
+        return null
+      }
+      return saved
     } catch (error) {
+      clearCardState()
       return null
     }
   }
@@ -165,6 +188,7 @@
     const user = { name, email, password }
     users.push(user)
     localStorage.setItem('travelinUsers', JSON.stringify(users))
+    clearCardState()
     setFeedback(signupFeedback, 'Account created. Opening your wallet...')
     setTimeout(()=>showApp(user), 450)
   })
@@ -175,6 +199,7 @@
     const password = $('#login-password').value
     const user = readUsers().find(account => account.email === email && account.password === password)
     if(!user){ setFeedback(loginFeedback, 'Email or password is incorrect.', true); return }
+    clearCardState()
     setFeedback(loginFeedback, 'Logged in. Opening your wallet...')
     setTimeout(()=>showApp(user), 350)
   })
