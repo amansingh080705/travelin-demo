@@ -20,7 +20,8 @@ app.get("/api/exchange-rates", async (req, res) => {
     const data = await response.json();
     const rates = Object.fromEntries(currencyCodes.map((code) => {
       const foreignPerInr = Number(data.rates?.[code]);
-      return [code, foreignPerInr > 0 ? Number((1 / foreignPerInr).toFixed(8)) : null];
+      const inrPerUnit = foreignPerInr > 0 ? 1 / foreignPerInr : null;
+      return [code, inrPerUnit !== null ? Number(inrPerUnit.toFixed(8)) : null];
     }));
 
     res.set("Cache-Control", "no-store");

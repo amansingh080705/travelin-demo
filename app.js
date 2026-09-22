@@ -191,9 +191,8 @@
     switchAuthMode('login')
   })
 
-  const savedSession = JSON.parse(localStorage.getItem('travelinSession') || 'null')
-  if(savedSession){ showApp(savedSession) }
-
+  // Do not auto-open the wallet on a fresh page load. The user must log in again.
+  // Keeping a saved session in localStorage should not skip the authentication screen.
   function genCardNumber(){ // demo card num generator
     const a = Math.floor(1000 + Math.random()*9000)
     const b = Math.floor(1000 + Math.random()*9000)
@@ -307,30 +306,30 @@
   }
 
   const currencyCatalog = [
-    ['AED', 'UAE Dirham', 22.46], ['AUD', 'Australian Dollar', 50.40],
-    ['AZN', 'Azerbaijani Manat', 58.32], ['BDT', 'Bangladeshi Taka', 0.75],
-    ['BHD', 'Bahraini Dinar', 258.35], ['BND', 'Brunei Dollar', 75.18],
-    ['BRL', 'Brazilian Real', 16.51], ['BYN', 'Belarusian Ruble', 29.82],
-    ['CAD', 'Canadian Dollar', 61.80], ['CHF', 'Swiss Franc', 104.62],
-    ['CNY', 'Chinese Yuan', 11.55], ['DKK', 'Danish Krone', 13.82],
-    ['EGP', 'Egyptian Pound', 1.72], ['EUR', 'Euro', 103.49],
-    ['GBP', 'British Pound', 103.25], ['GHS', 'Ghanaian Cedi', 6.28],
-    ['HKD', 'Hong Kong Dollar', 10.58], ['IDR', 'Indonesian Rupiah', 0.0052],
-    ['ILS', 'Israeli New Shekel', 22.68], ['JOD', 'Jordanian Dinar', 136.90],
-    ['JPY', 'Japanese Yen', 0.56], ['KES', 'Kenyan Shilling', 0.75],
-    ['KRW', 'South Korean Won', 0.061], ['KWD', 'Kuwaiti Dinar', 317.18],
-    ['LKR', 'Sri Lankan Rupee', 0.28], ['MAD', 'Moroccan Dirham', 9.99],
-    ['MYR', 'Malaysian Ringgit', 19.52], ['NGN', 'Nigerian Naira', 0.065],
-    ['NOK', 'Norwegian Krone', 8.78], ['NZD', 'New Zealand Dollar', 47.08],
-    ['OMR', 'Omani Rial', 204.38], ['PHP', 'Philippine Peso', 1.48],
-    ['PKR', 'Pakistani Rupee', 0.30], ['QAR', 'Qatari Riyal', 22.67],
-    ['RUB', 'Russian Ruble', 0.92], ['SAR', 'Saudi Riyal', 22.00],
-    ['SEK', 'Swedish Krona', 8.98], ['SGD', 'Singapore Dollar', 64.40],
-    ['THB', 'Thai Baht', 2.58], ['TND', 'Tunisian Dinar', 31.84],
-    ['TRY', 'Turkish Lira', 2.33], ['TWD', 'New Taiwan Dollar', 3.13],
-    ['UAH', 'Ukrainian Hryvnia', 2.32], ['UGX', 'Ugandan Shilling', 0.021],
-    ['USD', 'US Dollar', 82.50], ['INR', 'Indian Rupee', 1],
-    ['VND', 'Vietnamese Dong', 0.0033], ['ZAR', 'South African Rand', 4.57]
+    ['AED', 'UAE Dirham', 26.10], ['AUD', 'Australian Dollar', 62.40],
+    ['AZN', 'Azerbaijani Manat', 56.30], ['BDT', 'Bangladeshi Taka', 0.88],
+    ['BHD', 'Bahraini Dinar', 254.00], ['BND', 'Brunei Dollar', 70.80],
+    ['BRL', 'Brazilian Real', 16.10], ['BYN', 'Belarusian Ruble', 28.90],
+    ['CAD', 'Canadian Dollar', 69.90], ['CHF', 'Swiss Franc', 108.40],
+    ['CNY', 'Chinese Yuan', 13.15], ['DKK', 'Danish Krone', 14.20],
+    ['EGP', 'Egyptian Pound', 1.95], ['EUR', 'Euro', 103.49],
+    ['GBP', 'British Pound', 117.90], ['GHS', 'Ghanaian Cedi', 6.20],
+    ['HKD', 'Hong Kong Dollar', 12.20], ['IDR', 'Indonesian Rupiah', 0.0058],
+    ['ILS', 'Israeli New Shekel', 25.80], ['JOD', 'Jordanian Dinar', 135.00],
+    ['JPY', 'Japanese Yen', 0.64], ['KES', 'Kenyan Shilling', 0.74],
+    ['KRW', 'South Korean Won', 0.071], ['KWD', 'Kuwaiti Dinar', 312.00],
+    ['LKR', 'Sri Lankan Rupee', 0.29], ['MAD', 'Moroccan Dirham', 9.80],
+    ['MYR', 'Malaysian Ringgit', 20.20], ['NGN', 'Nigerian Naira', 0.066],
+    ['NOK', 'Norwegian Krone', 8.90], ['NZD', 'New Zealand Dollar', 57.60],
+    ['OMR', 'Omani Rial', 249.00], ['PHP', 'Philippine Peso', 1.70],
+    ['PKR', 'Pakistani Rupee', 0.34], ['QAR', 'Qatari Riyal', 26.30],
+    ['RUB', 'Russian Ruble', 1.02], ['SAR', 'Saudi Riyal', 25.50],
+    ['SEK', 'Swedish Krona', 8.90], ['SGD', 'Singapore Dollar', 70.20],
+    ['THB', 'Thai Baht', 2.80], ['TND', 'Tunisian Dinar', 30.80],
+    ['TRY', 'Turkish Lira', 2.50], ['TWD', 'New Taiwan Dollar', 3.10],
+    ['UAH', 'Ukrainian Hryvnia', 2.35], ['UGX', 'Ugandan Shilling', 0.024],
+    ['USD', 'US Dollar', 95.79], ['INR', 'Indian Rupee', 1],
+    ['VND', 'Vietnamese Dong', 0.0041], ['ZAR', 'South African Rand', 5.10]
   ]
   let currencies = currencyCatalog.map(([code, name, rate]) => [code, name, rate])
   const demoRates = Object.fromEntries(currencies.map(([code, name, rate]) => [code, rate]))
@@ -364,20 +363,10 @@
   restoreCardState()
 
   async function loadLiveRates(){
-    ratesStatus.textContent = 'Updating live rates...'
-    try {
-      const response = await fetch('https://open.er-api.com/v6/latest/INR', { cache: 'no-store' })
-      if(!response.ok) throw new Error('Rates request failed')
-      const data = await response.json()
-      const liveRates = data.rates || {}
-      currencies = currencyCatalog.map(([code, name, fallbackRate]) => [code, name, liveRates[code] || fallbackRate])
-      Object.assign(demoRates, Object.fromEntries(currencies.map(([code, name, rate]) => [code, rate])))
-      populateCurrencyOptions()
-      const updatedAt = data.time_last_update_utc ? new Date(data.time_last_update_utc).toLocaleString() : 'just now'
-      ratesStatus.textContent = `Live rates updated ${updatedAt}`
-    } catch(error) {
-      ratesStatus.textContent = 'Live rates unavailable. Showing fallback demo rates.'
-    }
+    ratesStatus.textContent = 'Using standard TravelIN INR rates.'
+    currencies = currencyCatalog.map(([code, name, rate]) => [code, name, rate])
+    Object.assign(demoRates, Object.fromEntries(currencies.map(([code, name, rate]) => [code, rate])))
+    populateCurrencyOptions()
   }
   loadLiveRates()
   setInterval(loadLiveRates, 15 * 60 * 1000)
